@@ -1,7 +1,5 @@
 use nom::branch::*;
-use nom::character::complete::*;
 use nom::combinator::*;
-use nom::sequence::*;
 use nom::IResult;
 
 use crate::parser::{

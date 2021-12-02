@@ -1,17 +1,22 @@
 use nom::branch::*;
+use nom::character::complete::*;
 use nom::combinator::*;
+use nom::sequence::*;
 use nom::IResult;
 
 use crate::parser::{
     literal::*,
     identifier::*,
     subseq::*,
+    expression::*,
+    space::*,
 };
 
 #[derive(Debug)]
 pub enum UnaryExpr {
     Literal(Literal),
     Identifier(Identifier),
+    Paren(Box<Expression>),
     Subseq(Box<UnaryExpr>, Subseq),
 }
 
@@ -19,7 +24,8 @@ impl UnaryExpr {
     pub fn parse(s: &str) -> IResult<&str, UnaryExpr> {
         let (mut s, mut unary) = alt((
                 map(Literal::parse, |l| UnaryExpr::Literal(l)),
-                map(Identifier::parse, |i| UnaryExpr::Identifier(i))
+                map(Identifier::parse, |i| UnaryExpr::Identifier(i)),
+                map(tuple((char('('), pyspace0, Expression::parse, pyspace0, char(')'))), |(_, _, e, _, _)| UnaryExpr::Paren(Box::new(e))),
         ))(s)?;
         while let Ok((ss, subseq)) = Subseq::parse(s) {
             s = ss;
