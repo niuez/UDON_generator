@@ -7,3 +7,4 @@ pub mod space;
 pub mod assign;
 pub mod call;
 pub mod index;
+pub mod member;
