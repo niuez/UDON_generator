@@ -6,6 +6,7 @@ use nom::multi::*;
 use nom::sequence::*;
 use nom::IResult;
 
+#[derive(Debug)]
 pub enum Literal {
     Integer(PyInteger),
     Float(PyFloat),
@@ -69,12 +70,12 @@ impl PyFloat {
         Ok((s, Literal::Float(PyFloat { num })))
     }
     fn parse_exponentfloat(s: &str) -> IResult<&str, Literal> {
-        let (s, (fl, exp, pm, expdigit)) = tuple((alt((parse_digitpart, parse_pointfloat)), one_of("eE"), opt(one_of("+-")), parse_digitpart))(s)?;
+        let (s, (fl, exp, pm, expdigit)) = tuple((alt((parse_pointfloat, parse_digitpart)), one_of("eE"), opt(one_of("+-")), parse_digitpart))(s)?;
         let num = format!("{}{}{}{}", fl, exp, pm.map(|c| c.to_string()).unwrap_or(String::new()), expdigit);
         Ok((s, Literal::Float(PyFloat { num })))
     }
     pub fn parse(s: &str) -> IResult<&str, Literal> {
-        alt((Self::parse_pointfloat, Self::parse_pointfloat_pointend, Self::parse_exponentfloat))(s)
+        alt((Self::parse_exponentfloat, Self::parse_pointfloat, Self::parse_pointfloat_pointend))(s)
     }
 }
 
@@ -84,7 +85,7 @@ pub struct PyString {
 }
 
 fn parse_nonescaped_character(s: &str) -> IResult<&str, String> {
-    let (s, c) = none_of("\\\"")(s)?;
+    let (s, c) = none_of("\\\"\'")(s)?;
     Ok((s, c.to_string()))
 }
 
@@ -95,15 +96,38 @@ fn parse_escaped_character(s: &str) -> IResult<&str, String> {
 
 impl PyString {
     fn parse_double_quote(s: &str) -> IResult<&str, Literal> {
-        let (s, (_, chars, _)) = tuple((char('\"'), many0(alt((parse_escaped_character, parse_nonescaped_character))), char('"')))(s)?;
+        let (s, (_, chars, _)) = tuple((char('\"'), many0(alt((parse_escaped_character, parse_nonescaped_character))), char('\"')))(s)?;
         Ok((s, Literal::String(PyString { string: chars.join("") })))
     }
     
     fn parse_single_quote(s: &str) -> IResult<&str, Literal> {
-        let (s, (_, chars, _)) = tuple((char('\"'), many0(alt((parse_escaped_character, parse_nonescaped_character))), char('"')))(s)?;
+        let (s, (_, chars, _)) = tuple((char('\''), many0(alt((parse_escaped_character, parse_nonescaped_character))), char('\'')))(s)?;
         Ok((s, Literal::String(PyString { string: chars.join("") })))
     }
     pub fn parse(s: &str) -> IResult<&str, Literal> {
         alt((Self::parse_double_quote, Self::parse_single_quote))(s)
     }
+}
+
+#[test]
+fn test_integer_parser() {
+    println!("{:?}", PyInteger::parse("12345").unwrap());
+    println!("{:?}", PyInteger::parse("123_456_789_0").unwrap());
+    println!("{:?}", PyInteger::parse("000_000_000_000").unwrap());
+}
+
+#[test]
+fn test_float_parser() {
+    println!("{:?}", PyFloat::parse("3.14").unwrap());
+    println!("{:?}", PyFloat::parse("10.").unwrap());
+    println!("{:?}", PyFloat::parse(".001").unwrap());
+    println!("{:?}", PyFloat::parse("1e100").unwrap());
+    println!("{:?}", PyFloat::parse("3.14e-10").unwrap());
+    println!("{:?}", PyFloat::parse("0e0").unwrap());
+    println!("{:?}", PyFloat::parse("3.14_15_93").unwrap());
+}
+
+#[test]
+fn test_string_parser() {
+    println!("{:?}", PyString::parse("\'he\\nre\'").unwrap());
 }
