@@ -1,5 +1,4 @@
 use nom::branch::*;
-use nom::bytes::complete::*;
 use nom::character::complete::*;
 use nom::combinator::*;
 use nom::multi::*;
@@ -11,6 +10,12 @@ pub enum Literal {
     Integer(PyInteger),
     Float(PyFloat),
     String(PyString),
+}
+
+impl Literal {
+    pub fn parse(s: &str) -> IResult<&str, Literal> {
+        alt((PyInteger::parse, PyFloat::parse, PyString::parse))(s)
+    }
 }
 
 #[derive(Debug)]
@@ -28,7 +33,7 @@ impl PyInteger {
         Ok((s, Literal::Integer(PyInteger { num })))
     }
     fn parse_zero(s: &str) -> IResult<&str, Literal> {
-        let (s, (head, tail)) = tuple((
+        let (s, (_head, _tail)) = tuple((
                 char('0'),
                 many0(tuple((opt(char('_')), char('0'))))
             ))(s)?;
