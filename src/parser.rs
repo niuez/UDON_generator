@@ -6,3 +6,4 @@ pub mod expression;
 pub mod space;
 pub mod assign;
 pub mod call;
+pub mod index;
