@@ -29,10 +29,13 @@ pub enum PositionalArg {
 
 impl PositionalArg {
     pub fn parse(s: &str) -> IResult<&str, PositionalArg> {
-        alt((
-            map(Assign::parse, |a| Self::Assign(a)),
-            map(tuple((char('*'), pyspace0, Expression::parse)), |(_, _, e)| Self::Starred(e))
-        ))(s)
+        let (s, (_, arg)) = tuple((peek(not(KeywordItem::parse)), 
+           alt((
+                   map(Assign::parse, |a| Self::Assign(a)),
+                   map(tuple((char('*'), pyspace0, Expression::parse)), |(_, _, e)| Self::Starred(e))
+           ))
+        ))(s)?;
+        Ok((s, arg))
     }
 }
 

@@ -12,7 +12,7 @@ use crate::parser::{
 /* https://docs.python.org/ja/3/reference/expressions.html#slicings */
 #[derive(Debug)]
 pub enum Index {
-    Index(Expression),
+    Index(Box<Expression>),
     Slice(Slice),
 }
 
@@ -20,7 +20,7 @@ impl Index {
     pub fn parse(s: &str) -> IResult<&str, Self> {
         let (s, (_, _, index, _, _)) = tuple((char('['), pyspace0,
             alt((
-                map(Expression::parse, |e| Self::Index(e)),
+                map(Expression::parse, |e| Self::Index(Box::new(e))),
                 map(Slice::parse, |s| Self::Slice(s)),
             )), pyspace0, char(']')
         ))(s)?;
@@ -30,17 +30,17 @@ impl Index {
 
 #[derive(Debug)]
 pub struct Slice {
-    lower: Option<Expression>,
-    upper: Option<Expression>,
-    stride: Option<Expression>,
+    lower: Option<Box<Expression>>,
+    upper: Option<Box<Expression>>,
+    stride: Option<Box<Expression>>,
 }
 
 impl Slice {
     pub fn parse(s: &str) -> IResult<&str, Self> {
         let (s, (lower, _, _, _, upper, stride)) = tuple((
-            opt(Expression::parse), pyspace0, char(':'), pyspace0,
-            opt(Expression::parse),
-            opt(map(tuple((pyspace0, char(':'), pyspace0, Expression::parse)), |(_, _, _, s)| s))
+            opt(map(Expression::parse, |e| Box::new(e))), pyspace0, char(':'), pyspace0,
+            opt(map(Expression::parse, |e| Box::new(e))),
+            opt(map(tuple((pyspace0, char(':'), pyspace0, Expression::parse)), |(_, _, _, s)| Box::new(s)))
         ))(s)?;
         Ok((s, Self { lower, upper, stride }))
     }
