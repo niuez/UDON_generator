@@ -19,6 +19,9 @@ impl Identifier {
         let name = std::iter::once(head).chain(tails.into_iter()).collect::<Vec<_>>().join("");
         Ok((s, Identifier { name }))
     }
+    pub fn transpile(self) -> String {
+        self.name
+    }
 }
 
 #[test]

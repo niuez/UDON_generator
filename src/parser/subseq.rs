@@ -23,4 +23,11 @@ impl Subseq {
             map(Member::parse, |c| Self::Member(c)),
         ))(s)
     }
+    pub fn transpile(self) -> String {
+        match self {
+            Self::Call(c) => c.transpile(),
+            Self::Index(i) => i.transpile(),
+            Self::Member(m) => m.transpile(),
+        }
+    }
 }

@@ -37,6 +37,12 @@ impl PositionalArg {
         ))(s)?;
         Ok((s, arg))
     }
+    pub fn transpile(self) -> String {
+        match self {
+            Self::Assign(a) => a.transpile(),
+            Self::Starred(s) => format!("*{}", s.transpile()),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -51,6 +57,12 @@ impl StarredAndKeywords {
             map(tuple((char('*'), pyspace0, Expression::parse)), |(_, _, e)| Self::Starred(e)),
             map(KeywordItem::parse, |k| Self::Keyword(k))
         ))(s)
+    }
+    pub fn transpile(self) -> String {
+        match self {
+            Self::Starred(s) => format!("*{}", s.transpile()),
+            Self::Keyword(k) => k.transpile(),
+        }
     }
 }
 
@@ -67,6 +79,12 @@ impl KeywordsArgs {
             map(KeywordItem::parse, |k| Self::Keyword(k))
         ))(s)
     }
+    pub fn transpile(self) -> String {
+        match self {
+            Self::DoubleStarred(s) => format!("**{}", s.transpile()),
+            Self::Keyword(k) => k.transpile(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -79,6 +97,9 @@ impl KeywordItem {
     pub fn parse(s: &str) -> IResult<&str, Self> {
         let (s, (id, _, _, _, expr)) = tuple((Identifier::parse, pyspace0, char('='), pyspace0, Expression::parse))(s)?;
         Ok((s, Self { id, expr }))
+    }
+    pub fn transpile(self) -> String {
+        format!("{}={}", self.id.transpile(), self.expr.transpile())
     }
 }
 
@@ -122,5 +143,12 @@ impl Call {
     }
     pub fn parse(s: &str) -> IResult<&str, Self> {
         alt((Self::parse_positional, Self::parse_starred, Self::parse_keywords, Self::parse_empty))(s)
+    }
+    pub fn transpile(self) -> String {
+        let positional = self.positional_args.into_iter().map(|a| a.transpile());
+        let starred = self.starred_and_keywords.into_iter().map(|a| a.transpile());
+        let keywords = self.keywords_args.into_iter().map(|a| a.transpile());
+        let args = positional.chain(starred).chain(keywords).collect::<Vec<_>>().join(", ");
+        format!("({})", args)
     }
 }

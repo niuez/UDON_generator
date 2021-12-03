@@ -21,4 +21,8 @@ impl Assign {
             opt(map(tuple((Identifier::parse, pyspace0, tag(":="), pyspace0)), |(id, _, _, _)| id)), Expression::parse))(s)?;
         Ok((s, Assign { id, expr }))
     }
+    pub fn transpile(self) -> String {
+        let id = self.id.map(|id| format!("{} := ", id.transpile())).unwrap_or(format!(""));
+        format!("{}{}", id, self.expr.transpile())
+    }
 }

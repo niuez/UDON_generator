@@ -19,4 +19,9 @@ impl Statement {
             map(tuple((SimpleStatement::parse, pynewline)), |(s, _)| Self::Simple(s)),
         ))(s)
     }
+    pub fn transpile(self) -> String {
+        match self {
+            Self::Simple(s) => s.transpile(),
+        }
+    }
 }
