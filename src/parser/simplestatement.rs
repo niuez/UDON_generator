@@ -27,6 +27,12 @@ impl SimpleStatement {
             map(Expression::parse, |e| Self::Expression(e)),
         ))(s)
     }
+    pub fn transpile(self) -> String {
+        match self {
+            Self::Expression(e) => e.transpile(),
+            Self::Assignment(a) => a.transpile(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -39,6 +45,13 @@ impl AssignmentStatement {
     pub fn parse(s: &str) -> IResult<&str, Self> {
         let (s, (target, _, _, _, expr)) = tuple((TargetList::parse, pyspace0, char('='), pyspace0, Expression::parse))(s)?;
         Ok((s, Self { target, expr }))
+    }
+    pub fn transpile(self) -> String {
+        match self.target {
+            TargetList::Identifier(id) => format!("{} := {}", id.transpile(), self.expr.transpile()),
+            TargetList::Attributeref(target, mem) => format!("{}.__setattr__(\"{}\", {})", target.transpile_as_var(), mem.transpile_var(), self.expr.transpile()),
+            TargetList::Slice(target, index) => format!("{}.__setitem__(\"{}\", {})", target.transpile_as_var(), index.transpile_var(), self.expr.transpile()),
+        }
     }
 }
 
@@ -66,6 +79,14 @@ impl TargetList {
             target = new_target;
         }
         Ok((s, target))
+    }
+    
+    pub fn transpile_as_var(self) -> String {
+        match self {
+            Self::Identifier(id) => id.transpile(),
+            Self::Attributeref(target, mem) => format!("{}{}", (*target).transpile_as_var(), mem.transpile()),
+            Self::Slice(target, index) => format!("{}{}", (*target).transpile_as_var(), index.transpile()),
+        }
     }
 }
 

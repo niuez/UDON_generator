@@ -16,6 +16,13 @@ impl Literal {
     pub fn parse(s: &str) -> IResult<&str, Literal> {
         alt((PyInteger::parse, PyFloat::parse, PyString::parse))(s)
     }
+    pub fn transpile(self) -> String {
+        match self {
+            Self::Integer(i) => i.transpile(),
+            Self::Float(f) => f.transpile(),
+            Self::String(s) => s.transpile(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -41,6 +48,9 @@ impl PyInteger {
     }
     pub fn parse(s: &str) -> IResult<&str, Literal> {
         alt((Self::parse_nonzero, Self::parse_zero))(s)
+    }
+    pub fn transpile(self) -> String {
+        self.num
     }
 }
 
@@ -82,6 +92,9 @@ impl PyFloat {
     pub fn parse(s: &str) -> IResult<&str, Literal> {
         alt((Self::parse_exponentfloat, Self::parse_pointfloat, Self::parse_pointfloat_pointend))(s)
     }
+    pub fn transpile(self) -> String {
+        self.num
+    }
 }
 
 #[derive(Debug)]
@@ -111,6 +124,9 @@ impl PyString {
     }
     pub fn parse(s: &str) -> IResult<&str, Literal> {
         alt((Self::parse_double_quote, Self::parse_single_quote))(s)
+    }
+    pub fn transpile(self) -> String {
+        format!("\"{}\"", self.string)
     }
 }
 

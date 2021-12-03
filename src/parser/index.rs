@@ -26,6 +26,15 @@ impl Index {
         ))(s)?;
         Ok((s, index))
     }
+    pub fn transpile_var(self) -> String {
+        match self {
+            Self::Index(e) => (*e).transpile(),
+            Self::Slice(s) => s.transpile(),
+        }
+    }
+    pub fn transpile(self) -> String {
+        format!("[{}]", self.transpile_var())
+    }
 }
 
 #[derive(Debug)]
@@ -43,5 +52,11 @@ impl Slice {
             opt(map(tuple((pyspace0, char(':'), pyspace0, Expression::parse)), |(_, _, _, s)| Box::new(s)))
         ))(s)?;
         Ok((s, Self { lower, upper, stride }))
+    }
+    pub fn transpile(self) -> String {
+        let lower = self.lower.map(|e| (*e).transpile()).unwrap_or(format!("None"));
+        let upper = self.upper.map(|e| (*e).transpile()).unwrap_or(format!("None"));
+        let stride = self.stride.map(|e| (*e).transpile()).unwrap_or(format!("None"));
+        format!("slice({}, {}, {})", lower, upper, stride)
     }
 }

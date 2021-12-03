@@ -24,4 +24,8 @@ impl FileInput {
         let stmts = stmts.into_iter().filter_map(|s| s).collect::<Vec<_>>();
         Ok((s, Self { stmts }))
     }
+    pub fn transpile(self) -> String {
+        let stmts = self.stmts.into_iter().map(|s| s.transpile()).collect::<Vec<_>>().join(", ");
+        format!("[{}]", stmts)
+    }
 }

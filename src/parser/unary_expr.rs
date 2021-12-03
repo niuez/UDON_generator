@@ -33,6 +33,14 @@ impl UnaryExpr {
         }
         Ok((s, unary))
     }
+    pub fn transpile(self) -> String {
+        match self {
+            Self::Literal(l) => l.transpile(),
+            Self::Identifier(i) => i.transpile(),
+            Self::Paren(e) => format!("({})", (*e).transpile()),
+            Self::Subseq(u, s) => format!("{}{}", (*u).transpile(), s.transpile()),
+        }
+    }
 }
 
 #[test]

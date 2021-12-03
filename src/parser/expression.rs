@@ -22,6 +22,12 @@ impl Expression {
             map(BinaryExpr::parse, |b| Self::Binaries(b)),
         ))(s)
     }
+    pub fn transpile(self) -> String {
+        match self {
+            Self::Not(e) => format!("not {}", (*e).transpile()),
+            Self::Binaries(b) => b.transpile(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -53,6 +59,14 @@ impl BinaryExpr {
             opes.push(ope);
         }
         Ok((s, BinaryExpr { exprs, opes }))
+    }
+    pub fn transpile(self) -> String {
+        let mut exprs = self.exprs.into_iter();
+        let mut s = exprs.next().unwrap().transpile();
+        for (o, e) in self.opes.into_iter().zip(exprs) {
+            s.push_str(&format!(" {} {}", o, e.transpile()));
+        }
+        s
     }
 }
 
