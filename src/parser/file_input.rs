@@ -17,7 +17,7 @@ impl FileInput {
     pub fn parse(s: &str) -> IResult<&str, Self> {
         let (s, stmts) = 
             many0(alt((
-                map(Statement::parse, |s| Some(s)),
+                map(Statement::parse(0), |s| Some(s)),
                 map(pynewline, |_| None),
             )))
         (s)?;
