@@ -11,3 +11,5 @@ pub mod member;
 pub mod simplestatement;
 pub mod statement;
 pub mod file_input;
+pub mod if_stmt;
+pub mod suite;
