@@ -1,4 +1,5 @@
 use nom::character::complete::*;
+use nom::sequence::*;
 use nom::IResult;
 
 pub fn pyspace0(s: &str) -> IResult<&str, &str> {
@@ -7,4 +8,9 @@ pub fn pyspace0(s: &str) -> IResult<&str, &str> {
 
 pub fn pyspace1(s: &str) -> IResult<&str, &str> {
     space1(s)
+}
+
+pub fn pynewline(s: &str) -> IResult<&str, ()> {
+    let (s, _) = tuple((pyspace0, line_ending))(s)?;
+    Ok((s, ()))
 }
