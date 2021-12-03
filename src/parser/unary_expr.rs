@@ -27,7 +27,7 @@ impl UnaryExpr {
                 map(Identifier::parse, |i| UnaryExpr::Identifier(i)),
                 map(tuple((char('('), pyspace0, Expression::parse, pyspace0, char(')'))), |(_, _, e, _, _)| UnaryExpr::Paren(Box::new(e))),
         ))(s)?;
-        while let Ok((ss, subseq)) = Subseq::parse(s) {
+        while let Ok((ss, (_, subseq))) = tuple((pyspace0, Subseq::parse))(s) {
             s = ss;
             unary = Self::Subseq(Box::new(unary), subseq);
         }

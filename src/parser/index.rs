@@ -20,8 +20,8 @@ impl Index {
     pub fn parse(s: &str) -> IResult<&str, Self> {
         let (s, (_, _, index, _, _)) = tuple((char('['), pyspace0,
             alt((
-                map(Expression::parse, |e| Self::Index(Box::new(e))),
                 map(Slice::parse, |s| Self::Slice(s)),
+                map(Expression::parse, |e| Self::Index(Box::new(e))),
             )), pyspace0, char(']')
         ))(s)?;
         Ok((s, index))
