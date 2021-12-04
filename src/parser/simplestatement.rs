@@ -56,7 +56,7 @@ impl AssignmentStatement {
         match self.target {
             TargetList::Identifier(id) => format!("{} := {}", id.transpile(), self.expr.transpile()),
             TargetList::Attributeref(target, mem) => format!("{}.__setattr__(\"{}\", {})", target.transpile_as_var(), mem.transpile_var(), self.expr.transpile()),
-            TargetList::Slice(target, index) => format!("{}.__setitem__(\"{}\", {})", target.transpile_as_var(), index.transpile_var(), self.expr.transpile()),
+            TargetList::Slice(target, index) => format!("{}.__setitem__({}, {})", target.transpile_as_var(), index.transpile_var(), self.expr.transpile()),
         }
     }
 }

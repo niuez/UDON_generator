@@ -42,7 +42,7 @@ impl UnaryExpr {
                     |(_, es, _, _, _)| UnaryExpr::Tuple(es)),
                 map(tuple((
                         char('['),
-                        separated_list1(
+                        separated_list0(
                             tuple((pyspace0, char(','))),
                             map(tuple((pyspace0, Expression::parse)), |(_, e)| e)
                         ),
@@ -64,7 +64,7 @@ impl UnaryExpr {
             Self::Identifier(i) => i.transpile(),
             Self::Paren(e) => format!("({})", (*e).transpile()),
             Self::Tuple(es) => format!("({}, )", es.into_iter().map(|e| e.transpile()).collect::<Vec<_>>().join(", ")),
-            Self::List(es) => format!("[{}, ]", es.into_iter().map(|e| e.transpile()).collect::<Vec<_>>().join(", ")),
+            Self::List(es) => format!("[{}]", es.into_iter().map(|e| e.transpile()).collect::<Vec<_>>().join(", ")),
             Self::UnaryOpe(o, u) => format!("{}{}", o, (*u).transpile()),
             Self::Subseq(u, s) => format!("{}{}", (*u).transpile(), s.transpile()),
         }
