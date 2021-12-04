@@ -17,6 +17,7 @@ pub enum UnaryExpr {
     Literal(Literal),
     Identifier(Identifier),
     Paren(Box<Expression>),
+    UnaryOpe(char, Box<UnaryExpr>),
     Subseq(Box<UnaryExpr>, Subseq),
 }
 
@@ -26,6 +27,7 @@ impl UnaryExpr {
                 map(Literal::parse, |l| UnaryExpr::Literal(l)),
                 map(Identifier::parse, |i| UnaryExpr::Identifier(i)),
                 map(tuple((char('('), pyspace0, Expression::parse, pyspace0, char(')'))), |(_, _, e, _, _)| UnaryExpr::Paren(Box::new(e))),
+                map(tuple((one_of("+-~"), pyspace0, UnaryExpr::parse)), |(o, _, u)| Self::UnaryOpe(o, Box::new(u))),
         ))(s)?;
         while let Ok((ss, (_, subseq))) = tuple((pyspace0, Subseq::parse))(s) {
             s = ss;
@@ -38,6 +40,7 @@ impl UnaryExpr {
             Self::Literal(l) => l.transpile(),
             Self::Identifier(i) => i.transpile(),
             Self::Paren(e) => format!("({})", (*e).transpile()),
+            Self::UnaryOpe(o, u) => format!("{}{}", o, (*u).transpile()),
             Self::Subseq(u, s) => format!("{}{}", (*u).transpile(), s.transpile()),
         }
     }
