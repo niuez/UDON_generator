@@ -3,7 +3,6 @@ use nom::combinator::*;
 use nom::character::complete::*;
 use nom::sequence::*;
 use nom::IResult;
-
 use crate::parser::{
     expression::*,
     identifier::*,
@@ -20,6 +19,7 @@ pub enum SimpleStatement {
     Expression(Expression),
     Assignment(AssignmentStatement),
     Import(Import),
+    FromImport(FromImport),
 }
 
 impl SimpleStatement {
@@ -27,6 +27,7 @@ impl SimpleStatement {
         alt((
             map(AssignmentStatement::parse, |a| Self::Assignment(a)),
             map(Import::parse, |i| Self::Import(i)),
+            map(FromImport::parse, |fi| Self::FromImport(fi)),
             map(Expression::parse, |e| Self::Expression(e)),
         ))(s)
     }
@@ -34,6 +35,7 @@ impl SimpleStatement {
         match self {
             Self::Expression(e) => e.transpile(),
             Self::Import(i) => i.transpile(),
+            Self::FromImport(i) => i.transpile(),
             Self::Assignment(a) => a.transpile(),
         }
     }
