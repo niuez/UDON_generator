@@ -3,7 +3,6 @@ use nom::combinator::*;
 use nom::character::complete::*;
 use nom::sequence::*;
 use nom::IResult;
-
 use crate::parser::{
     expression::*,
     identifier::*,
@@ -11,6 +10,7 @@ use crate::parser::{
     index::*,
     member::*,
     space::*,
+    import::*,
 };
 
 /* https://docs.python.org/ja/3/reference/simple_stmts.html#grammar-token-python-grammar-expression_stmt */
@@ -18,18 +18,24 @@ use crate::parser::{
 pub enum SimpleStatement {
     Expression(Expression),
     Assignment(AssignmentStatement),
+    Import(Import),
+    FromImport(FromImport),
 }
 
 impl SimpleStatement {
     pub fn parse(s: &str) -> IResult<&str, Self> {
         alt((
             map(AssignmentStatement::parse, |a| Self::Assignment(a)),
+            map(Import::parse, |i| Self::Import(i)),
+            map(FromImport::parse, |fi| Self::FromImport(fi)),
             map(Expression::parse, |e| Self::Expression(e)),
         ))(s)
     }
     pub fn transpile(self) -> String {
         match self {
             Self::Expression(e) => e.transpile(),
+            Self::Import(i) => i.transpile(),
+            Self::FromImport(i) => i.transpile(),
             Self::Assignment(a) => a.transpile(),
         }
     }
