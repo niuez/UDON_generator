@@ -15,3 +15,4 @@ pub mod if_stmt;
 pub mod for_stmt;
 pub mod suite;
 pub mod import;
+pub mod func_def;

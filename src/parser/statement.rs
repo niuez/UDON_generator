@@ -7,13 +7,16 @@ use crate::parser::{
     simplestatement::*,
     if_stmt::*,
     for_stmt::*,
-    space::*, };
+    space::*,
+    func_def::*,
+};
 
 #[derive(Debug)]
 pub enum Statement {
     Simple(SimpleStatement),
     IfStmt(IfStatement),
     ForStmt(ForStatement),
+    FuncDef(FuncDefinition),
 }
 
 impl Statement {
@@ -23,6 +26,7 @@ impl Statement {
                 map(tuple((SimpleStatement::parse, pynewline)), |(s, _)| Self::Simple(s)),
                 map(IfStatement::parse(indent), |s| Self::IfStmt(s)),
                 map(ForStatement::parse(indent), |s| Self::ForStmt(s)),
+                map(FuncDefinition::parse(indent), |s| Self::FuncDef(s)),
             ))(s)
         }
     }
@@ -31,6 +35,7 @@ impl Statement {
             Self::Simple(s) => s.transpile(),
             Self::IfStmt(i) => i.transpile(),
             Self::ForStmt(f) => f.transpile(),
+            Self::FuncDef(f) => f.transpile(),
         }
     }
 }
