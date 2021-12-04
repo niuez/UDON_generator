@@ -16,3 +16,4 @@ pub mod for_stmt;
 pub mod suite;
 pub mod import;
 pub mod func_def;
+pub mod class_def;

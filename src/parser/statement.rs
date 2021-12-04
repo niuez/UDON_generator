@@ -9,6 +9,7 @@ use crate::parser::{
     for_stmt::*,
     space::*,
     func_def::*,
+    class_def::*,
 };
 
 #[derive(Debug)]
@@ -17,6 +18,7 @@ pub enum Statement {
     IfStmt(IfStatement),
     ForStmt(ForStatement),
     FuncDef(FuncDefinition),
+    ClassDef(ClassDefinition),
 }
 
 impl Statement {
@@ -27,6 +29,7 @@ impl Statement {
                 map(IfStatement::parse(indent), |s| Self::IfStmt(s)),
                 map(ForStatement::parse(indent), |s| Self::ForStmt(s)),
                 map(FuncDefinition::parse(indent), |s| Self::FuncDef(s)),
+                map(ClassDefinition::parse(indent), |s| Self::ClassDef(s)),
             ))(s)
         }
     }
@@ -36,6 +39,7 @@ impl Statement {
             Self::IfStmt(i) => i.transpile(),
             Self::ForStmt(f) => f.transpile(),
             Self::FuncDef(f) => f.transpile(),
+            Self::ClassDef(c) => c.transpile(),
         }
     }
 }

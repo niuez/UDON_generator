@@ -35,6 +35,10 @@ impl FuncDefinition {
         let args = self.args.into_iter().map(|a| a.transpile()).collect::<Vec<_>>().join(", ");
         format!("{} := lambda {} : {}", self.funcname.transpile(), args, self.suite.transpile())
     }
+    pub fn transpile_name_def(self) -> (String, String) {
+        let args = self.args.into_iter().map(|a| a.transpile()).collect::<Vec<_>>().join(", ");
+        (self.funcname.transpile(), format!("lambda {} : {}", args, self.suite.transpile()))
+    }
 }
 
 #[derive(Debug)]
