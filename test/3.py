@@ -1,9 +1,9 @@
 NY = list(map(int, input().split()))
 N = NY[0]
 Y = NY[1]
-a = 0-1
-n = 0-1
-s = 0-1
+a = -1
+n = -1
+s = -1
 for x in range(N+1):
   for y in range(N+1-x):
     z = N - (x + y)
