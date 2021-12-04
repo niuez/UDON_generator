@@ -3,6 +3,7 @@ use nom::character::complete::*;
 use nom::combinator::*;
 use nom::sequence::*;
 use nom::IResult;
+use nom::multi::*;
 
 use crate::parser::{
     literal::*,
@@ -18,6 +19,7 @@ pub enum UnaryExpr {
     Identifier(Identifier),
     Paren(Box<Expression>),
     UnaryOpe(char, Box<UnaryExpr>),
+    Tuple(Vec<Expression>),
     Subseq(Box<UnaryExpr>, Subseq),
 }
 
@@ -27,6 +29,16 @@ impl UnaryExpr {
                 map(Literal::parse, |l| UnaryExpr::Literal(l)),
                 map(Identifier::parse, |i| UnaryExpr::Identifier(i)),
                 map(tuple((char('('), pyspace0, Expression::parse, pyspace0, char(')'))), |(_, _, e, _, _)| UnaryExpr::Paren(Box::new(e))),
+                map(tuple((
+                        char('('),
+                        separated_list1(
+                            tuple((pyspace0, char(','))),
+                            map(tuple((pyspace0, Expression::parse)), |(_, e)| e)
+                        ),
+                        opt(tuple((pyspace0, char(',')))),
+                        pyspace0, char(')')
+                    )),
+                    |(_, es, _, _, _)| UnaryExpr::Tuple(es)),
                 map(tuple((one_of("+-~"), pyspace0, UnaryExpr::parse)), |(o, _, u)| Self::UnaryOpe(o, Box::new(u))),
         ))(s)?;
         while let Ok((ss, (_, subseq))) = tuple((pyspace0, Subseq::parse))(s) {
@@ -40,6 +52,7 @@ impl UnaryExpr {
             Self::Literal(l) => l.transpile(),
             Self::Identifier(i) => i.transpile(),
             Self::Paren(e) => format!("({})", (*e).transpile()),
+            Self::Tuple(es) => format!("({}, )", es.into_iter().map(|e| e.transpile()).collect::<Vec<_>>().join(", ")),
             Self::UnaryOpe(o, u) => format!("{}{}", o, (*u).transpile()),
             Self::Subseq(u, s) => format!("{}{}", (*u).transpile(), s.transpile()),
         }

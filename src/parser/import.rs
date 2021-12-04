@@ -65,7 +65,7 @@ impl FromImport {
     pub fn transpile(self) -> String {
         let module = self.module.into_iter().map(|id| id.transpile()).collect::<Vec<_>>().join(".");
         let from_list = self.imports.iter().map(|(id, _)| format!("\"{}\"", id.clone().transpile())).collect::<Vec<_>>().join(", ");
-        let import = format!("udon_import = __import__(\"{}\", fromlist=[{}])", module, from_list);
+        let import = format!("udon_import := __import__(\"{}\", fromlist=[{}])", module, from_list);
         let assigns = self.imports.into_iter().map(|(module, as_id)| {
             let id = as_id.map(|id| id.transpile()).unwrap_or_else(|| module.clone().transpile());
             format!("{} := udon_import.{}", id, module.transpile())
