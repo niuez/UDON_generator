@@ -1,0 +1,99 @@
+<html>
+  <head>
+    <title>1本うどんコードトランスパイラ</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
+      crossorigin="anonymous"
+      />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
+      integrity="sha384-tKLJeE1ALTUwtXlaGjJYM3sejfssWdAaWR2s97axw4xkiAdMzQjtOjgcyw0Y50KU"
+      crossorigin="anonymous"
+      />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+      crossorigin="anonymous"
+      ></script>
+
+    <!-- OR ANY OTHER AMD LOADER HERE INSTEAD OF loader.js -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.27.0/min/vs/loader.js"></script>
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/editor/editor.main.min.css">
+   <script type="module">
+import init, { greet } from "./pkg/wasm_test.js";
+
+async function transpile(prog) {
+  return greet(prog);
+}
+
+window.addEventListener("DOMContentLoaded", function () {
+
+  var input;
+  var output;
+  var text = [
+    'function x() {',
+    '\tconsole.log("Hello world!");',
+    '}'
+  ].join('\n');
+  require.config({ 
+    paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' },
+    'vs/nls' : {
+      availableLanguages : {
+        "*" : "ja"
+      }
+    }
+  });
+
+  init().then(wasm => {
+    require(['vs/editor/editor.main'], function() {
+      //session = monaco.editor.createModel(text,"javascript");
+      input = monaco.editor.create(document.getElementById('input'), {
+        value: "#include <vector>\nstruct Vec<T> $${std::vector<$ty(T)>}$$ {\nfn new() -> Self $${std::vector<$ty(T)>()}$$\nfn init(N: u64, t: T) -> Self $${std::vector<$ty(T)>($arg(N), $arg(t))}$$\nfn push(self: &mut Self, t: T) -> void $${$arg(self)->push_back($arg(t))}$$\nfn len(self: &Self) -> u64 $${$arg(self)->size()}$$\nfn pop(self: &mut Self) -> void $${$arg(self)->pop_back()}$$\n}\n\nimpl<T> Index for Vec<T> {\ntype Output = T;\ntype Arg = u64;\nfn index(self: &Self, i: u64) -> &T $${($arg(self)->at($arg(i)))}$$\n}\n\nimpl<T> IndexMut for Vec<T> {\nfn index_mut(self: &mut Self, i: u64) -> &mut T $${($arg(self)->at($arg(i)))}$$\n}\n"});
+      output = monaco.editor.create(document.getElementById('output'), { language: "cpp", });
+      //input.setModel(session);
+      //output.setModel(session);
+      let lastProgram = "";
+
+      const sync = async function () {
+        try {
+          if (
+            input.getValue() != lastProgram
+          ) {
+            lastProgram = input.getValue();
+            output.setValue("transpiling...");
+            console.log(lastProgram);
+            let transpiledProgram = await transpile(lastProgram);
+            output.setValue(transpiledProgram);
+          }
+        } catch (e) {
+          console.log(e);
+          output.setValue(e.toString());
+        }
+        setTimeout(sync, 1000);
+      };
+      sync();
+    });
+  });
+});
+   </script>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Niu Playground</h2>
+      <p><a href="https://github.com/niuez/Niu">niuez/Niu - GitHub</a></p>
+      <div class="row">
+        <div class="col-md">
+          <div id="input" style="height: 600px; border: 1px solid grey"></div>
+        </div>
+        <div class="col-md">
+          <div id="output" style="height: 600px; border: 1px solid grey"></div>
+        </div>
+      </div>
+  </body>
+</html>
