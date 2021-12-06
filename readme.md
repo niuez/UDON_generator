@@ -53,6 +53,7 @@
     - `relative_module`がよくわからなかったので実装していない
 [`8. 複合文`](https://docs.python.org/ja/3/reference/compound_stmts.html)
 - 行間を入れると壊れます
+- インデントはスペース2つのみです
 - [`statement`](./src/parser/statement.rs)
   - `simple statement`
   - [`if statement`](./src/parser/if_stmt.rs)
