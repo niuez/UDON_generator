@@ -54,7 +54,8 @@ window.addEventListener("DOMContentLoaded", function () {
     require(['vs/editor/editor.main'], function() {
       //session = monaco.editor.createModel(text,"javascript");
       input = monaco.editor.create(document.getElementById('input'), {
-        value: ""});
+        value: "class UnionFind:\n  def __init__(self, N):\n    self.par = []\n    for i in range(N):\n      self.par.append(i)\n  def find(self, x):\n    if x != self.par[x]: \n      self.par[x] = self.find(self.par[x])\n    return self.par[x]\n  def unite(self, x, y):\n    x = self.find(x)\n    y = self.find(y)\n    self.par[y] = x\n  def same(self, x, y):\n    return self.find(self.par[x]) == self.find(self.par[y])\nNQ = list(map(int, input().split()))\nN = NQ[0]\nQ = NQ[1]\nuf = UnionFind(N)\nfor i in range(0, Q):\n  PAB = list(map(int, input().split()))\n  P = PAB[0]\n  A = PAB[1]\n  B = PAB[2]\n  if P == 0:\n    uf.unite(A, B)\n  else:\n    print(\"YNeos\"[not uf.same(A, B)::2])\n\n" });
+[UnionFind := type("UnionFind", (), {"__init__": (lambda self, N : [self.__setattr__("par", []), [[self.par.append(i)] for i in range(N)], None][2]), "find": (lambda self, x : [[self.par.__setitem__(x, self.find(self.par[x]))] if x != self.par[x] else [], self.par[x]][1]), "unite": (lambda self, x, y : [x := self.find(x), y := self.find(y), self.par.__setitem__(y, x), None][3]), "same": (lambda self, x, y : [self.find(self.par[x]) == self.find(self.par[y])][0])}), NQ := list(map(int, input().split())), N := NQ[0], Q := NQ[1], uf := UnionFind(N), [[PAB := list(map(int, input().split())), P := PAB[0], A := PAB[1], B := PAB[2], [uf.unite(A, B)] if P == 0 else [print("YNeos"[slice(not uf.same(A, B), None, 2)])]] for i in range(0, Q)]]
       output = monaco.editor.create(document.getElementById('output'), { language: "cpp", });
       //input.setModel(session);
       //output.setModel(session);
