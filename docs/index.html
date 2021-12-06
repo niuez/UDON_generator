@@ -26,7 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.27.0/min/vs/loader.js"></script>
     <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/editor/editor.main.min.css">
    <script type="module">
-import init, { greet } from "./pkg/wasm_test.js";
+import init, { greet } from "./pkg/udon_generator_lib.js";
 
 async function transpile(prog) {
   return greet(prog);
@@ -54,7 +54,7 @@ window.addEventListener("DOMContentLoaded", function () {
     require(['vs/editor/editor.main'], function() {
       //session = monaco.editor.createModel(text,"javascript");
       input = monaco.editor.create(document.getElementById('input'), {
-        value: "#include <vector>\nstruct Vec<T> $${std::vector<$ty(T)>}$$ {\nfn new() -> Self $${std::vector<$ty(T)>()}$$\nfn init(N: u64, t: T) -> Self $${std::vector<$ty(T)>($arg(N), $arg(t))}$$\nfn push(self: &mut Self, t: T) -> void $${$arg(self)->push_back($arg(t))}$$\nfn len(self: &Self) -> u64 $${$arg(self)->size()}$$\nfn pop(self: &mut Self) -> void $${$arg(self)->pop_back()}$$\n}\n\nimpl<T> Index for Vec<T> {\ntype Output = T;\ntype Arg = u64;\nfn index(self: &Self, i: u64) -> &T $${($arg(self)->at($arg(i)))}$$\n}\n\nimpl<T> IndexMut for Vec<T> {\nfn index_mut(self: &mut Self, i: u64) -> &mut T $${($arg(self)->at($arg(i)))}$$\n}\n"});
+        value: ""});
       output = monaco.editor.create(document.getElementById('output'), { language: "cpp", });
       //input.setModel(session);
       //output.setModel(session);
@@ -85,8 +85,8 @@ window.addEventListener("DOMContentLoaded", function () {
   </head>
   <body>
     <div class="container">
-      <h2>Niu Playground</h2>
-      <p><a href="https://github.com/niuez/Niu">niuez/Niu - GitHub</a></p>
+      <h2>1本うどんコードgenerator</h2>
+      <p><a href="https://github.com/niuez/UDON_generator">niuez/UDON_generator - GitHub</a></p>
       <div class="row">
         <div class="col-md">
           <div id="input" style="height: 600px; border: 1px solid grey"></div>
